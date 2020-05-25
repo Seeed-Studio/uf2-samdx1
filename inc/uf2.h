@@ -273,13 +273,53 @@ void RGBLED_set_color(uint32_t color);
 
 // Not all targets have a LED
 #if defined(LED_PIN)
+#if defined(LED_PIN_PULLUP)
+#define LED_MSC_OFF() PINOP(LED_PIN, OUTSET)
+#define LED_MSC_ON() PINOP(LED_PIN, OUTCLR)
+#define LED_MSC_TGL() PINOP(LED_PIN, OUTTGL)
+#else
 #define LED_MSC_OFF() PINOP(LED_PIN, OUTCLR)
 #define LED_MSC_ON() PINOP(LED_PIN, OUTSET)
 #define LED_MSC_TGL() PINOP(LED_PIN, OUTTGL)
+#endif
 #else
 #define LED_MSC_OFF()
 #define LED_MSC_ON()
 #define LED_MSC_TGL()
+#endif
+
+// Not all targets have a TX LED
+#if defined(LED_TX_PIN)
+#if defined(LED_TX_PIN_PULLUP)
+#define LED_TX_OFF() PINOP(LED_TX_PIN, OUTSET)
+#define LED_TX_ON() PINOP(LED_TX_PIN, OUTCLR)
+#define LED_TX_TGL() PINOP(LED_TX_PIN, OUTTGL)
+#else
+#define LED_TX_OFF() PINOP(LED_TX_PIN, OUTCLR)
+#define LED_TX_ON() PINOP(LED_TX_PIN, OUTSET)
+#define LED_TX_TGL() PINOP(LED_LED_TX_PINPIN, OUTTGL)
+#endif
+#else
+#define LED_TX_OFF()
+#define LED_TX_ON()
+#define LED_TX_TGL()
+#endif
+
+// Not all targets have a RX LED
+#if defined(LED_RX_PIN)
+#if defined(LED_RX_PIN_PULLUP)
+#define LED_RX_OFF() PINOP(LED_RX_PIN, OUTSET)
+#define LED_RX_ON() PINOP(LED_RX_PIN, OUTCLR)
+#define LED_RX_TGL() PINOP(LED_RX_PIN, OUTTGL)
+#else
+#define LED_RX_OFF() PINOP(LED_RX_PIN, OUTCLR)
+#define LED_RX_ON() PINOP(LED_RX_PIN, OUTSET)
+#define LED_RX_TGL() PINOP(LED_LED_RX_PINPIN, OUTTGL)
+#endif
+#else
+#define LED_RX_OFF()
+#define LED_RX_ON()
+#define LED_RX_TGL()
 #endif
 
 extern uint32_t timerHigh, resetHorizon;
