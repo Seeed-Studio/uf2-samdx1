@@ -3,10 +3,10 @@
 
 //#define CRYSTALLESS    0
 
-#define VENDOR_NAME "Seeed Studio"
-#define PRODUCT_NAME "Seeeduino XIAO"
-#define VOLUME_LABEL "Arduino"
-#define INDEX_URL "https://www.seeedstudio.com/"
+#define VENDOR_NAME "MycoSense"
+#define PRODUCT_NAME "DLP BOARD XIAO"
+#define VOLUME_LABEL "DLP_BOARD"
+#define INDEX_URL "https://github.com/Mycosense/SL-xiao-bootloader"
 
 #define BOARD_ID "SAMD21G18A-XIAO-v0"
 
