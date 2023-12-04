@@ -29,4 +29,16 @@
 #define BOOT_USART_PAD1                   PINMUX_PB09D_SERCOM4_PAD1
 #define BOOT_USART_PAD0                   PINMUX_PB08D_SERCOM4_PAD0
 
+/* Master clock frequency */
+//#define CPU_FREQUENCY                     (48000000ul)
+#define VARIANT_MCK                       CPU_FREQUENCY
+
+/* Frequency of the board main oscillator */
+#define VARIANT_MAINOSC                   (32768ul)
+#define CRYSTALLESS                       (1)
+
+/* Calibration values for DFLL48 pll */
+//#define NVM_SW_CALIB_DFLL48M_COARSE_VAL   (58)
+//#define NVM_SW_CALIB_DFLL48M_FINE_VAL     (64)
+
 #endif
