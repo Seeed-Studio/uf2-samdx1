@@ -1,0 +1,55 @@
+name: Build
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  crossbuild-xiao-bootloader:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Git describe
+        id: ghd
+        uses: proudust/gh-describe@v1
+      - name: Install toolchain
+        run: |
+          wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
+          echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
+      - name: Compile
+        run: make BOARD=XIAO_m0 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+      - name: upload github
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            build/XIAO_m0/update-bootloader-XIAO_m0*.uf2
+            build/XIAO_m0/update-bootloader-XIAO_m0*.bin
+          name: update-bootloader-xiao
+
+  upload-to-gcloud:
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: crossbuild-xiao-bootloader
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: update-bootloader-xiao
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+      - id: upload-file
+        uses: google-github-actions/upload-cloud-storage@v1
+        with:
+          path: ./
+          destination: sl-mcu-firmware/bootloaders/seeeduino-xiao
+          glob: update-bootloader-XIAO_m0*
+          process_gcloudignore: false
+          gzip: false
+
