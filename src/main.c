@@ -75,6 +75,8 @@
 
 #include "uf2.h"
 
+#define BOOTLOADER_TIMEOUT 100000 // approx 5s
+
 static void check_start_application(void);
 
 static volatile bool main_b_cdc_enable = false;
@@ -205,8 +207,8 @@ int main(void) {
     RGBLED_set_color(COLOR_START);
     led_tick_step = 10;
 
-    /* Wait for a complete enum on usb or a '#' char on serial line */
-    while (1) {
+    /* Wait for a complete enum on usb or a '#' char on serial line until timeout */
+    for(uint32_t i = 0; i < BOOTLOADER_TIMEOUT; i++) {
         if (USB_Ok()) {
             if (!main_b_cdc_enable) {
 #if USE_SINGLE_RESET
@@ -259,4 +261,6 @@ int main(void) {
             }
         }
     }
+    // after timeout, we restart
+    NVIC_SystemReset();
 }
