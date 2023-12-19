@@ -29,6 +29,7 @@ jobs:
           path: |
             build/XIAO_m0/update-bootloader-XIAO_m0*.uf2
             build/XIAO_m0/update-bootloader-XIAO_m0*.bin
+            build/XIAO_m0/bootloader-XIAO_m0*.bin
           name: update-bootloader-xiao
 
   upload-to-gcloud:
@@ -49,7 +50,7 @@ jobs:
         with:
           path: ./
           destination: sl-mcu-firmware/bootloaders/seeeduino-xiao
-          glob: update-bootloader-XIAO_m0*
+          glob: ./*bootloader-XIAO_m0*
           process_gcloudignore: false
           gzip: false
 
