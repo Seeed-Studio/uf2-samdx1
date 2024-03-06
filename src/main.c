@@ -74,10 +74,14 @@
  */
 
 #include "uf2.h"
+#include "crc16_ccitt.h"
 
 #define BOOTLOADER_TIMEOUT 100000 // approx 5s
+#define BLD_METABLOCK_SIZE 0x100
+static const uint8_t BLD_METABLOCK_MAGIC[] = {0x01, 0x05};
 
-static void check_start_application(void);
+static bool verify_application_code(void);
+static bool is_metablock(void);
 
 static volatile bool main_b_cdc_enable = false;
 extern int8_t led_tick_step;
@@ -93,19 +97,6 @@ extern int8_t led_tick_step;
  *
  */
 static void check_start_application(void) {
-    uint32_t app_start_address;
-
-    /* Load the Reset Handler address of the application */
-    app_start_address = *(uint32_t *)(APP_START_ADDRESS + 4);
-
-    /**
-     * Test reset vector of application @APP_START_ADDRESS+4
-     * Sanity check on the Reset_Handler address
-     */
-    if (app_start_address < APP_START_ADDRESS || app_start_address > FLASH_SIZE) {
-        /* Stay in bootloader */
-        return;
-    }
 
 #if USE_SINGLE_RESET
     if (SINGLE_RESET()) {
@@ -135,17 +126,44 @@ static void check_start_application(void) {
         *DBL_TAP_PTR = 0;
     }
 
+
+
     LED_MSC_OFF();
     RGBLED_set_color(COLOR_LEAVE);
 
+    uint32_t app_start_address;
+    if(is_metablock())
+    {
+        if(!verify_application_code())
+        {
+            return;  // invalid meta data, stay in bootloader
+        }
+        app_start_address = APP_START_ADDRESS + BLD_METABLOCK_SIZE;
+    }
+    else
+    {
+        // Legacy firmware w/o metablock
+        app_start_address = APP_START_ADDRESS;
+    }
+
+    uint32_t app_reset_handler_address = *(uint32_t *)(app_start_address + 4);
+    uint32_t main_stack_pointer_address = *(uint32_t *)app_start_address;
+    uint32_t vector_table_address = ((uint32_t)app_start_address & SCB_VTOR_TBLOFF_Msk);
+
+    // Reset Handler sanity check
+    if (app_reset_handler_address < app_start_address || app_reset_handler_address > FLASH_SIZE) {
+        /* Stay in bootloader */
+        return;
+    }
+
     /* Rebase the Stack Pointer */
-    __set_MSP(*(uint32_t *)APP_START_ADDRESS);
+    __set_MSP(main_stack_pointer_address);
 
     /* Rebase the vector table base address */
-    SCB->VTOR = ((uint32_t)APP_START_ADDRESS & SCB_VTOR_TBLOFF_Msk);
+    SCB->VTOR = vector_table_address;
 
     /* Jump to application Reset Handler in the application */
-    asm("bx %0" ::"r"(app_start_address));
+    asm("bx %0" ::"r"(app_reset_handler_address));
 }
 
 extern char _etext;
@@ -263,4 +281,25 @@ int main(void) {
     }
     // after timeout, we restart
     NVIC_SystemReset();
+}
+
+// True: success (application code valid)
+static bool verify_application_code(void)
+{
+    uint16_t crc = *(uint16_t*)(APP_START_ADDRESS + 2);
+    uint32_t firmware_size = *(uint32_t*)(APP_START_ADDRESS + 4);
+    uint16_t crc_calculated = crc16_calc((uint8_t*)(APP_START_ADDRESS + BLD_METABLOCK_SIZE), firmware_size, 0);
+    if(crc == crc_calculated)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static bool is_metablock(void)
+{
+    return memcmp(BLD_METABLOCK_MAGIC, (uint8_t*)APP_START_ADDRESS, sizeof(BLD_METABLOCK_MAGIC)) == 0;
 }

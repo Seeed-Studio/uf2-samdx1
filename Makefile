@@ -74,6 +74,7 @@ COMMON_SRC = \
 
 SOURCES = $(COMMON_SRC) \
 	src/cdc_enumerate.c \
+	src/crc16_ccitt.c \
 	src/fat.c \
 	src/main.c \
 	src/msc.c \

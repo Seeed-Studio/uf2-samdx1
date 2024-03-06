@@ -206,7 +206,7 @@ int main(void) {
 
 #ifdef SAMD21
     // Re-enable BOOTPROT
-    setBootProt(2); // 8k
+    //setBootProt(2); // 8k  this crashes Seeeduino Xiao
 #endif
     // For the SAMD51, the boot protection will automatically be re-enabled on
     // reset.
