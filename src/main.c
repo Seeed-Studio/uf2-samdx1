@@ -225,6 +225,12 @@ int main(void) {
     RGBLED_set_color(COLOR_START);
     led_tick_step = 10;
 
+
+#ifdef JETSON_ENABLE_PIN
+    PINOP(JETSON_ENABLE_PIN, DIRSET);
+    PINOP(JETSON_ENABLE_PIN, OUTSET);
+#endif
+
     /* Wait for a complete enum on usb or a '#' char on serial line until timeout */
     for(uint32_t i = 0; i < BOOTLOADER_TIMEOUT; i++) {
         if (USB_Ok()) {
