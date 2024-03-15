@@ -13,10 +13,10 @@ jobs:
   crossbuild-xiao-bootloader:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Git describe
         id: ghd
-        uses: proudust/gh-describe@v1
+        uses: proudust/gh-describe@v2
       - name: Install toolchain
         run: |
           wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
@@ -24,7 +24,7 @@ jobs:
       - name: Compile
         run: make BOARD=XIAO_m0 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
       - name: upload github
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: |
             build/XIAO_m0/update-bootloader-XIAO_m0*.uf2
@@ -32,25 +32,48 @@ jobs:
             build/XIAO_m0/bootloader-XIAO_m0*.bin
           name: update-bootloader-xiao
 
+  crossbuild-nano33-bootloader:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Git describe
+        id: ghd
+        uses: proudust/gh-describe@v2
+      - name: Install toolchain
+        run: |
+          wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
+          echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
+      - name: Compile
+        run: make BOARD=arduino_nano33 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+      - name: upload github
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            build/arduino_nano33/update-bootloader-arduino_nano33*.uf2
+            build/arduino_nano33/update-bootloader-arduino_nano33*.bin
+            build/arduino_nano33/bootloader-arduino_nano33*.bin
+          name: update-bootloader-arduino_nano33
+
   upload-to-gcloud:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: crossbuild-xiao-bootloader
+    needs: [crossbuild-xiao-bootloader, crossbuild-nano33-bootloader]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: update-bootloader-xiao
+          merge-multiple: true
+      - run: ls -la 
       - id: auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
       - id: upload-file
-        uses: google-github-actions/upload-cloud-storage@v1
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
           path: ./
-          destination: sl-mcu-firmware/bootloaders/seeeduino-xiao
-          glob: ./*bootloader-XIAO_m0*
+          destination: sl-mcu-firmware/bootloaders/
+          glob: ./*bootloader-*
           process_gcloudignore: false
           gzip: false
 
