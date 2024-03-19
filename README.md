@@ -6,6 +6,17 @@ the USB MSC (mass storage).
 
 [![Build Status](https://travis-ci.org/Microsoft/uf2-samd21.svg?branch=master)](https://travis-ci.org/Microsoft/uf2-samd21)
 
+
+## Mycosense Modifications
+
+This bootloader has been modified to include a CRC check of the application firmware binary before each boot.
+Therefore, a 256 byte meta data block is prepended to the application binary, containing a 2 byte magic to recognize the meta block,
+the CRC16 CCITT checksum, and the length of the application binary (w/o metablock) as 32bit little endian integer.
+If the calculated check is correct, we jump to the application, otherwise, we enter the bootloader.
+
+The magic bytes allow us to be retrocompatible with standard arduino firmware binaries, not containing the meta block.
+In this case, we boot if we have a valid address for the reset handler.
+
 ## UF2
 
 **UF2 (USB Flashing Format)** is a name of a file format, developed by Microsoft, that is particularly
