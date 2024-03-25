@@ -14,8 +14,20 @@ Therefore, a 256 byte meta data block is prepended to the application binary, co
 the CRC16 CCITT checksum, and the length of the application binary (w/o metablock) as 32bit little endian integer.
 If the calculated check is correct, we jump to the application, otherwise, we enter the bootloader.
 
+```mermaid
+block-beta
+  columns 3
+  Bootloader:3
+  block:app:3
+    %% columns auto (default)
+    Magic_bytes crc app_length
+  end
+  application:3
+```
+
 The magic bytes allow us to be retrocompatible with standard arduino firmware binaries, not containing the meta block.
 In this case, we boot if we have a valid address for the reset handler.
+
 
 ## UF2
 
