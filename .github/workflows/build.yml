@@ -54,10 +54,32 @@ jobs:
             build/arduino_nano33/bootloader-arduino_nano33*.bin
           name: update-bootloader-arduino_nano33
 
+  crossbuild-spotlight-orin-bootloader:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Git describe
+        id: ghd
+        uses: proudust/gh-describe@v2
+      - name: Install toolchain
+        run: |
+          wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
+          echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
+      - name: Compile
+        run: make BOARD=spotlight_orin UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+      - name: upload github
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            build/spotlight_orin/update-bootloader-spotlight_orin*.bin
+            build/spotlight_orin/bootloader-spotlight_orin*.bin
+          name: update-bootloader-spotlight_orin
+
+
   upload-to-gcloud:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [crossbuild-xiao-bootloader, crossbuild-nano33-bootloader]
+    needs: [crossbuild-xiao-bootloader, crossbuild-nano33-bootloader, crossbuild-spotlight-orin-bootloader]
     steps:
       - uses: actions/download-artifact@v4
         with:
