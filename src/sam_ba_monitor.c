@@ -29,7 +29,7 @@
 
 #include "uf2.h"
 
-static const char fullVersion[] = "v" SAM_BA_VERSION " [Arduino:XYZ] " UF2_VERSION_BASE "\n\r";
+static const char fullVersion[] = "v" SAM_BA_VERSION " [Arduino:XYZ] {" BOARD_ID "} " UF2_VERSION_BASE "\n\r";
 
 /* b_terminal_mode mode (ascii) or hex mode */
 #if USE_CDC_TERMINAL
