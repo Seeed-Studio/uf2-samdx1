@@ -54,7 +54,7 @@ jobs:
           name: update-bootloader-dlp3
 
 
-  crossbuild-nano33-bootloader:
+  crossbuild-spotlight_motherboard-bootloader:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
@@ -66,42 +66,20 @@ jobs:
           wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
           echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
       - name: Compile
-        run: make BOARD=arduino_nano33 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+        run: make BOARD=spotlight_motherboard UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
       - name: upload github
         uses: actions/upload-artifact@v4
         with:
           path: |
-            build/arduino_nano33/update-bootloader-arduino_nano33*.uf2
-            build/arduino_nano33/update-bootloader-arduino_nano33*.bin
-            build/arduino_nano33/bootloader-arduino_nano33*.bin
-          name: update-bootloader-arduino_nano33
-
-  crossbuild-spotlight-orin-bootloader:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Git describe
-        id: ghd
-        uses: proudust/gh-describe@v2
-      - name: Install toolchain
-        run: |
-          wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
-          echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
-      - name: Compile
-        run: make BOARD=spotlight_orin UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
-      - name: upload github
-        uses: actions/upload-artifact@v4
-        with:
-          path: |
-            build/spotlight_orin/update-bootloader-spotlight_orin*.bin
-            build/spotlight_orin/bootloader-spotlight_orin*.bin
-          name: update-bootloader-spotlight_orin
-
+            build/spotlight_motherboard/update-bootloader-spotlight_motherboard*.uf2
+            build/spotlight_motherboard/update-bootloader-spotlight_motherboard*.bin
+            build/spotlight_motherboard/bootloader-spotlight_motherboard*.bin
+          name: update-bootloader-spotlight_motherboard
 
   upload-to-gcloud:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [crossbuild-dlp2-bootloader, crossbuild-nano33-bootloader, crossbuild-spotlight-orin-bootloader, crossbuild-dlp3-bootloader]
+    needs: [crossbuild-spotlight_motherboard-bootloader, crossbuild-dlp2-bootloader, crossbuild-dlp3-bootloader]
     steps:
       - uses: actions/download-artifact@v4
         with:

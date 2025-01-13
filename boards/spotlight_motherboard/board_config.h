@@ -38,7 +38,7 @@
 #define VENDOR_NAME "MycoSense"
 #define PRODUCT_NAME "JETSON BOARD NANO"
 #define VOLUME_LABEL "JTS_BOARD"
-#define BOARD_ID "SAMD21G18A-NANO33-v0"
+#define BOARD_ID "spotlight_motherboard"
 
 #define DBL_TAP_MAGIC 0x07738135
 
