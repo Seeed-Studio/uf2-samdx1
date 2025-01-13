@@ -10,7 +10,7 @@ on:
       - '*'
 
 jobs:
-  crossbuild-xiao-bootloader:
+  crossbuild-dlp2-bootloader:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
@@ -22,15 +22,15 @@ jobs:
           wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
           echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
       - name: Compile
-        run: make BOARD=XIAO_m0 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+        run: make BOARD=dlp2 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
       - name: upload github
         uses: actions/upload-artifact@v4
         with:
           path: |
-            build/XIAO_m0/update-bootloader-XIAO_m0*.uf2
-            build/XIAO_m0/update-bootloader-XIAO_m0*.bin
-            build/XIAO_m0/bootloader-XIAO_m0*.bin
-          name: update-bootloader-xiao
+            build/dlp2/update-bootloader-dlp2*.uf2
+            build/dlp2/update-bootloader-dlp2*.bin
+            build/dl2/bootloader-dlp2*.bin
+          name: update-bootloader-dlp2
 
   crossbuild-dlp3-bootloader:
     runs-on: ubuntu-20.04
@@ -101,7 +101,7 @@ jobs:
   upload-to-gcloud:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [crossbuild-xiao-bootloader, crossbuild-nano33-bootloader, crossbuild-spotlight-orin-bootloader, crossbuild-dlp3-bootloader]
+    needs: [crossbuild-dlp2-bootloader, crossbuild-nano33-bootloader, crossbuild-spotlight-orin-bootloader, crossbuild-dlp3-bootloader]
     steps:
       - uses: actions/download-artifact@v4
         with:
