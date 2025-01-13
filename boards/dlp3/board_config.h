@@ -6,7 +6,7 @@
 #define VOLUME_LABEL "DLP_BOARD"
 #define INDEX_URL "https://github.com/Mycosense/SL-xiao-bootloader"
 
-#define BOARD_ID "DLP-v3"
+#define BOARD_ID "dlp3"
 
 #define BOOT_USART_MODULE                 SERCOM2
 #define BOOT_USART_BUS_CLOCK_INDEX        PM_APBCMASK_SERCOM2
