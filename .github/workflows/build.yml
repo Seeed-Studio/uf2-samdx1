@@ -29,7 +29,7 @@ jobs:
           path: |
             build/dlp2/update-bootloader-dlp2*.uf2
             build/dlp2/update-bootloader-dlp2*.bin
-            build/dl2/bootloader-dlp2*.bin
+            build/dlp2/bootloader-dlp2*.bin
           name: update-bootloader-dlp2
 
   crossbuild-dlp3-bootloader:
