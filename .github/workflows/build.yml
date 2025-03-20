@@ -19,17 +19,20 @@ jobs:
         uses: proudust/gh-describe@v2
       - name: Install toolchain
         run: |
+          cd samba
           wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
           echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
       - name: Compile
-        run: make BOARD=dlp2 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+        run: |
+          cd samba
+          make BOARD=dlp2 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
       - name: upload github
         uses: actions/upload-artifact@v4
         with:
           path: |
-            build/dlp2/update-bootloader-dlp2*.uf2
-            build/dlp2/update-bootloader-dlp2*.bin
-            build/dlp2/bootloader-dlp2*.bin
+            samba/build/dlp2/update-bootloader-dlp2*.uf2
+            samba/build/dlp2/update-bootloader-dlp2*.bin
+            samba/build/dlp2/bootloader-dlp2*.bin
           name: update-bootloader-dlp2
 
   crossbuild-dlp3-bootloader:
@@ -41,16 +44,19 @@ jobs:
         uses: proudust/gh-describe@v2
       - name: Install toolchain
         run: |
+          cd samba
           wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
           echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
       - name: Compile
-        run: make BOARD=dlp3 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+        run: |
+          cd samba
+          make BOARD=dlp3 UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
       - name: upload github
         uses: actions/upload-artifact@v4
         with:
           path: |
-            build/dlp3/update-bootloader-dlp3*.bin
-            build/dlp3/bootloader-dlp3*.bin
+            samba/build/dlp3/update-bootloader-dlp3*.bin
+            samba/build/dlp3/bootloader-dlp3*.bin
           name: update-bootloader-dlp3
 
 
@@ -63,17 +69,20 @@ jobs:
         uses: proudust/gh-describe@v2
       - name: Install toolchain
         run: |
+          cd samba
           wget -qO- https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v8.3.1-1.4/xpack-arm-none-eabi-gcc-8.3.1-1.4-linux-x64.tar.gz | tar -zxv
           echo "xpack-arm-none-eabi-gcc-8.3.1-1.4/bin" >> $GITHUB_PATH
       - name: Compile
-        run: make BOARD=spotlight_motherboard UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
+        run: |
+          cd samba
+          make BOARD=spotlight_motherboard UF2_VERSION_BASE=${{ steps.ghd.outputs.describe }}
       - name: upload github
         uses: actions/upload-artifact@v4
         with:
           path: |
-            build/spotlight_motherboard/update-bootloader-spotlight_motherboard*.uf2
-            build/spotlight_motherboard/update-bootloader-spotlight_motherboard*.bin
-            build/spotlight_motherboard/bootloader-spotlight_motherboard*.bin
+            samba/build/spotlight_motherboard/update-bootloader-spotlight_motherboard*.uf2
+            samba/build/spotlight_motherboard/update-bootloader-spotlight_motherboard*.bin
+            samba/build/spotlight_motherboard/bootloader-spotlight_motherboard*.bin
           name: update-bootloader-spotlight_motherboard
 
   upload-to-gcloud:
@@ -84,7 +93,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - run: ls -la 
       - id: auth
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -93,7 +101,7 @@ jobs:
       - id: upload-file
         uses: google-github-actions/upload-cloud-storage@v2
         with:
-          path: ./
+          path: ./samba/
           destination: sl-mcu-firmware/bootloaders/
           glob: ./*bootloader-*
           process_gcloudignore: false
