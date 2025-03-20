@@ -5,7 +5,13 @@
 
 #define I2C_SLAVE_ADDRESS 0x30
 #define BLINK_HALF_PERIOD_MS 500
-static char BLD_VERSION[] = "BLD_V0.2";
+
+#define str(s) #s
+#define xstr(s) str(s)
+
+#ifndef BLD_VERSION
+#define BLD_VERSION dev
+#endif
 
 #define START_APPLICATION_BYTE_PTR ((volatile uint32_t *)(HMCRAMC0_ADDR + HMCRAMC0_SIZE - 4))
 #define START_APPLICATION_MAGIC 0xf02669ef
@@ -97,7 +103,7 @@ void loop() {
       reboot_to_application();
       break;
     case FLASH_GET_VERSION:
-      g_i2c_flash.write_version(BLD_VERSION);
+      g_i2c_flash.write_version(xstr(BLD_VERSION));
       break;
     case FLASH_READY:
       break;
