@@ -4,7 +4,7 @@
 #include <i2c_flash.h>
 
 #define I2C_SLAVE_ADDRESS 0x30
-#define BLINK_HALF_PERIOD_MS 500
+#define BLINK_HALF_PERIOD_MS 100
 
 #define str(s) #s
 #define xstr(s) str(s)
