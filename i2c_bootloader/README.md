@@ -44,4 +44,14 @@ CRC_HH CRC_H CRC_L CRC_LL
 
 ### GET_BLD_VERSION `0xCF`
 Sending this command loads the bootloader's version as C-style string into the tx buffer.
-A Subsequent read returns the bootloader's version. The maximal length is 40 bytes. 
+A Subsequent read returns the bootloader's version. The maximal length is 40 bytes.
+
+## Write Protection
+The bootloader automatically sets write protection for its own region.
+Therefore, once flashed, the chip cannot be erased anymore.
+To deactivate write protection, write 0xff to 0x804000.
+
+With `JLinkExe`, use the following command:
+```shell
+write1 804000 ff
+```
