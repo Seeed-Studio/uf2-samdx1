@@ -56,7 +56,9 @@ class I2CFlasher:
         self.i2c.transfer(self.device_addr, [I2C.Message(self.CMD_ERASE_CHIP)])
 
     def flash(self, filename: str) -> None:
+        logging.debug('erasing chip')
         self.erase_chip()
+        logging.debug('chip erased')
         time.sleep(1)
         self.write_file(filename)
 
@@ -105,6 +107,5 @@ if __name__ == "__main__":
         log_level = logging.WARNING
     logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
 
-    flasher = I2CFlasher('/dev/i2c-7')
-    file_name = sys.argv[1]
-    flasher.flash_and_start(file_name)
+    flasher = I2CFlasher(args.device)
+    flasher.flash_and_start(args.firmware_path)
