@@ -30,11 +30,8 @@
 #include "uf2.h"
 
 #ifdef SAMD11
-// SAMD11 USB module only exposes DEVICE; legacy code still uses HOST.* fields.
-// Provide shims to keep code compiling; repoint all HOST references to DEVICE.
+// SAMD11 USB module only exposes DEVICE; repoint HOST references.
 #define HOST DEVICE
-// Provide a minimal unique ID pointer array similar to larger MCUs for serial generation.
-static volatile uint32_t *addresses[] = { (uint32_t *)0x00806010, (uint32_t *)0x00806014, (uint32_t *)0x00806018, (uint32_t *)0x0080601C };
 #endif
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -395,6 +392,11 @@ static void load_serial_number(char serial_number[SERIAL_NUMBER_LENGTH]) {
     uint32_t* addresses[4] = {(uint32_t *) 0x008061FC, (uint32_t *) 0x00806010,
                               (uint32_t *) 0x00806014, (uint32_t *) 0x00806018};
     #endif
+    #ifdef SAMD11
+    // According to SAM D11 datasheet, unique ID words at 0x0080 6010..0x0080 601C
+    uint32_t* addresses[4] = {(uint32_t *)0x00806010, (uint32_t *)0x00806014,
+                              (uint32_t *)0x00806018, (uint32_t *)0x0080601C};
+    #endif
     uint32_t serial_number_idx = 0;
     for (int i = 0; i < 4; i++) {
         serial_number_idx += writeNum(&(serial_number[serial_number_idx]), *(addresses[i]), true);
@@ -475,6 +477,10 @@ void AT91F_InitUSB(void) {
     #define DP_PIN PIN_PA25G_USB_DP
     #define DP_MUX MUX_PA25G_USB_DP
     #endif
+    #ifdef SAMD11
+    PM->APBBMASK.reg |= PM_APBBMASK_USB; // enable USB clock domain
+    // Use board_config provided DM_PIN/DP_PIN numeric indexes and DM_MUX/DP_MUX values
+    #endif
     #ifdef SAMD51
     #define DM_PIN PIN_PA24H_USB_DM
     #define DM_MUX MUX_PA24H_USB_DM
@@ -484,13 +490,11 @@ void AT91F_InitUSB(void) {
 
     /* Set up the USB DP/DN pins */
     PORT->Group[0].PINCFG[DM_PIN].bit.PMUXEN = 1;
-    PORT->Group[0].PMUX[DM_PIN / 2].reg &= ~(0xF << (4 * (DM_PIN & 0x01u)));
-    PORT->Group[0].PMUX[DM_PIN / 2].reg |= DM_MUX << (4 * (DM_PIN & 0x01u));
+    PORT->Group[0].PMUX[DM_PIN / 2].reg = (PORT->Group[0].PMUX[DM_PIN / 2].reg & ~(0xF << (4 * (DM_PIN & 0x01u)))) | (DM_MUX << (4 * (DM_PIN & 0x01u)));
     PORT->Group[0].PINCFG[DP_PIN].bit.PMUXEN = 1;
-    PORT->Group[0].PMUX[DP_PIN / 2].reg &= ~(0xF << (4 * (DP_PIN & 0x01u)));
-    PORT->Group[0].PMUX[DP_PIN / 2].reg |= DP_MUX << (4 * (DP_PIN & 0x01u));
+    PORT->Group[0].PMUX[DP_PIN / 2].reg = (PORT->Group[0].PMUX[DP_PIN / 2].reg & ~(0xF << (4 * (DP_PIN & 0x01u)))) | (DP_MUX << (4 * (DP_PIN & 0x01u)));
 
-    #ifdef SAMD21
+    #if defined(SAMD21) || defined(SAMD11)
     GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(6) | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_CLKEN;
     while (GCLK->STATUS.bit.SYNCBUSY) {}
     #endif
@@ -508,29 +512,18 @@ void AT91F_InitUSB(void) {
         /* Sync wait */
     }
 
-    /* Load Pad Calibration */
+    /* Load Pad Calibration (common for D11/D21; apply sane fallbacks if fuses read as all-ones) */
     pad_transn = ((*((uint32_t*) USB_FUSES_TRANSN_ADDR)) & USB_FUSES_TRANSN_Msk) >> USB_FUSES_TRANSN_Pos;
+    pad_transp = ((*((uint32_t*) USB_FUSES_TRANSP_ADDR)) & USB_FUSES_TRANSP_Msk) >> USB_FUSES_TRANSP_Pos;
+    pad_trim   = ((*((uint32_t*) USB_FUSES_TRIM_ADDR))   & USB_FUSES_TRIM_Msk)   >> USB_FUSES_TRIM_Pos;
 
-    if (pad_transn == 0x1F) {
-        pad_transn = 5;
-    }
+    if (pad_transn == 0x1F) pad_transn = 5;   // datasheet recommended typicals
+    if (pad_transp == 0x1F) pad_transp = 29;
+    if (pad_trim   == 0x7)  pad_trim   = 3;
 
     USB->HOST.PADCAL.bit.TRANSN = pad_transn;
-
-    pad_transp = ((*((uint32_t*) USB_FUSES_TRANSP_ADDR)) & USB_FUSES_TRANSP_Msk) >> USB_FUSES_TRANSP_Pos;
-
-    if (pad_transp == 0x1F) {
-        pad_transp = 29;
-    }
-
     USB->HOST.PADCAL.bit.TRANSP = pad_transp;
-    pad_trim = ((*((uint32_t*) USB_FUSES_TRIM_ADDR)) & USB_FUSES_TRIM_Msk) >> USB_FUSES_TRIM_Pos;
-
-    if (pad_trim == 0x7) {
-        pad_trim = 3;
-    }
-
-    USB->HOST.PADCAL.bit.TRIM = pad_trim;
+    USB->HOST.PADCAL.bit.TRIM   = pad_trim;
 
     /* Set the configuration */
     /* Set mode to Device mode */
