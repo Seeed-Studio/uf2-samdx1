@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "samd11.h": "c"
+        "samd11.h": "c",
+        "sam.h": "c"
     }
 }
