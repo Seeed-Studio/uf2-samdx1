@@ -246,12 +246,20 @@ void padded_memcpy(char *dst, const char *src, int len);
 #ifdef SAMD51
 #define DBL_TAP_PTR ((volatile uint32_t *)(HSRAM_ADDR + HSRAM_SIZE - 4))
 #endif
+#ifdef SAMD11
+// SAMD11 has single 4K SRAM at 0x20000000; place magic at last word.
+#define DBL_TAP_PTR ((volatile uint32_t *)(0x20000000 + (4 * 1024) - 4))
+#endif
 #define DBL_TAP_MAGIC 0xf01669ef // Randomly selected, adjusted to have first and last bit set
 #define DBL_TAP_MAGIC_QUICK_BOOT 0xf02669ef
 
 #if USE_SINGLE_RESET
 #ifdef SAMD21
 #define SINGLE_RESET() (*((uint32_t *)0x20B4) == 0x87eeb07c)
+#endif
+#ifdef SAMD11
+// No known stable SINGLE_RESET signature region for SAMD11; disable.
+#undef USE_SINGLE_RESET
 #endif
 #ifdef SAMD51
 #define SINGLE_RESET() (*((uint32_t *)0x4268) == 0x87eeb07c)

@@ -80,7 +80,7 @@ static void check_start_application(void);
 static volatile bool main_b_cdc_enable = false;
 extern int8_t led_tick_step;
 
-#if defined(SAMD21)
+#if defined(SAMD11) || defined(SAMD21)
     #define RESET_CONTROLLER PM
 #elif defined(SAMD51)
     #define RESET_CONTROLLER RSTC
@@ -270,7 +270,7 @@ int main(void) {
             }
         }
 #endif
-#else // no monitor
+#else 
         if (main_b_cdc_enable) {
             process_msc();
         }

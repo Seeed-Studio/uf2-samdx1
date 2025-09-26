@@ -29,6 +29,13 @@
 
 #include "uf2.h"
 
+#ifdef SAMD11
+// SAMD11 USB module only exposes DEVICE; legacy code still uses HOST.* fields.
+// Provide shims to keep code compiling; repoint all HOST references to DEVICE.
+#define HOST DEVICE
+// Provide a minimal unique ID pointer array similar to larger MCUs for serial generation.
+static volatile uint32_t *addresses[] = { (uint32_t *)0x00806010, (uint32_t *)0x00806014, (uint32_t *)0x00806018, (uint32_t *)0x0080601C };
+#endif
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 PacketBuffer ctrlOutCache;
