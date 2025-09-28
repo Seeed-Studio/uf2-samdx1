@@ -16,7 +16,7 @@
 #define UF2_FAMILY 0x55114460
 #endif
 #ifdef SAMD11
-#define APP_START_ADDRESS 0x00002000
+#define APP_START_ADDRESS 0x00001500
 #define UF2_FAMILY 0x68ed2b88
 #endif
 
