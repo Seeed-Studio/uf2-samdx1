@@ -1,6 +1,10 @@
 #include "uf2.h"
 #include "neopixel.h"
 
+#ifdef SAMD11
+volatile uint32_t dbl_tap_storage __attribute__((section(".uf2_dbl_tap"))) = 0;
+#endif
+
 static uint32_t timerLow;
 uint32_t timerHigh, resetHorizon;
 
@@ -12,6 +16,9 @@ void delay(uint32_t ms) {
 // SAMD51 starts up at 48mhz by default.
 #ifdef SAMD51
     ms <<= 12;
+#endif
+#ifdef SAMD11
+    ms <<= 8;
 #endif
     for (int i = 1; i < ms; ++i) {
         asm("nop");
