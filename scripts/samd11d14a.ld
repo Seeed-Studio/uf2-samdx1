@@ -39,4 +39,13 @@ SECTIONS
     _ebss = .;
     _end = .;
   } > RAM
+
+  /* Persistent (no-init) storage for double-tap magic; placed after BSS so it isn't zeroed and is away from stack top */
+  .uf2_dbl_tap (NOLOAD) :
+  {
+    _sdbltap = .;
+    KEEP(*(.uf2_dbl_tap))
+    . = ALIGN(4);
+    _edbltap = .;
+  } > RAM
 }

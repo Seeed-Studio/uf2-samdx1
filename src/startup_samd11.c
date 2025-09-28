@@ -1,6 +1,7 @@
 // Startup code for SAMD11 (similar style to SAMD21 but trimmed)
 #include "board_config.h"
 #include "samd11.h"
+#include "uf2.h" // for DBL_TAP_PTR / DBL_TAP_MAGIC definitions
 
 /* Linker script symbols */
 extern uint32_t _etext, _srelocate, _erelocate, _sbss, _ebss, _estack;
@@ -38,21 +39,15 @@ void AC_Handler(void)           __attribute__((weak, alias("Dummy_Handler")));
 void DAC_Handler(void)          __attribute__((weak, alias("Dummy_Handler")));
 void PTC_Handler(void)          __attribute__((weak, alias("Dummy_Handler")));
 
-// Provided by main.c for LED timing
-void LED_TICK(void) __attribute__((weak));
-
-// Provide non-weak implementation (overrides weak alias) for LED tick support
-void SysTick_Handler(void) { if (LED_TICK) LED_TICK(); }
+void SysTick_Handler(void) {}
 
 void Reset_Handler(void) {
     uint32_t *src = &_etext;
     uint32_t *dst = &_srelocate;
-    while (dst < &_erelocate) *dst++ = *src++;
-    for (dst = &_sbss; dst < &_ebss; ) *dst++ = 0;
-    // Set VTOR to start of flash (vector table at 0x0000)
-    SCB->VTOR = (0x00000000 & SCB_VTOR_TBLOFF_Msk);
-    // Minimal NVM workaround similar to SAMD21
-    NVMCTRL->CTRLB.bit.MANW = 1;
+    while (dst < &_erelocate)
+        *dst++ = *src++;
+    for (dst = &_sbss; dst < &_ebss; )
+        *dst++ = 0;
     main();
     while (1) {}
 }

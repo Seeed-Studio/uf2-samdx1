@@ -70,7 +70,7 @@
 // will start the app. This only happens if the app says it wants that (see SINGLE_RESET() below).
 // If disabled here or by the app, the bootloader will only start with double-click of the reset
 // button.
-#define USE_SINGLE_RESET 1
+#define USE_SINGLE_RESET 0
 
 // Fine-tuning of features
 #define USE_HID_SERIAL 0   // just an example, not really needed; 36 bytes
@@ -247,8 +247,9 @@ void padded_memcpy(char *dst, const char *src, int len);
 #define DBL_TAP_PTR ((volatile uint32_t *)(HSRAM_ADDR + HSRAM_SIZE - 4))
 #endif
 #ifdef SAMD11
-// SAMD11 has single 4K SRAM at 0x20000000; place magic at last word.
-#define DBL_TAP_PTR ((volatile uint32_t *)(0x20000000 + (4 * 1024) - 4))
+// Use a dedicated NOLOAD section variable instead of last RAM word (which collides with initial stack pushes)
+extern volatile uint32_t dbl_tap_storage __attribute__((section(".uf2_dbl_tap")));
+#define DBL_TAP_PTR (&dbl_tap_storage)
 #endif
 #define DBL_TAP_MAGIC 0xf01669ef // Randomly selected, adjusted to have first and last bit set
 #define DBL_TAP_MAGIC_QUICK_BOOT 0xf02669ef
