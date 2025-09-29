@@ -9,7 +9,7 @@ ifeq ($(CHIP_FAMILY), samd51)
 COMMON_FLAGS = -mthumb -mcpu=cortex-m4 -O2 -g -DSAMD51
 endif
 ifeq ($(CHIP_FAMILY), samd11)
-COMMON_FLAGS = -mthumb -mcpu=cortex-m0plus -Os -g -DSAMD11
+COMMON_FLAGS += -mthumb -mcpu=cortex-m0plus -Os -g -DSAMD11
 endif
 WFLAGS = \
 -Werror -Wall -Wstrict-prototypes \

@@ -74,9 +74,9 @@
 
 // Fine-tuning of features
 #define USE_HID_SERIAL 0   // just an example, not really needed; 36 bytes
-#define USE_HID_EXT 1      // extended HID commands (read/write mem); 60 bytes
-#define USE_HID_HANDOVER 1 // allow HID application->bootloader seamless transition; 56 bytes
-#define USE_MSC_HANDOVER 1 // ditto for MSC; 348 bytes
+#define USE_HID_EXT 0      // extended HID commands (read/write mem); 60 bytes
+#define USE_HID_HANDOVER 0 // allow HID application->bootloader seamless transition; 56 bytes
+#define USE_MSC_HANDOVER 0 // ditto for MSC; 348 bytes
 #define USE_MSC_CHECKS 0   // check validity of MSC commands; 460 bytes
 #define USE_CDC_TERMINAL 0 // enable ASCII mode on CDC loop (not used by BOSSA); 228 bytes
 #define USE_DBG_MSC 0      // output debug info about MSC
@@ -274,6 +274,9 @@ void system_init(void);
 #define LED_TICK led_tick
 
 #define PINOP(pin, OP) (PORT->Group[(pin) / 32].OP.reg = (1 << ((pin) % 32)))
+#define PINIP(pin) (((PORT->Group[(pin) / 32].IN.reg) >> ((pin) % 32)) & 0x1)
+#define PINCFG(pin) (PORT->Group[(pin) / 32].PINCFG[(pin) % 32].reg)
+#define PINMUX(pin) (PORT->Group[(pin) / 32].PMUX[((pin) % 32)/2].reg)
 
 void led_tick(void);
 void led_signal(void);
