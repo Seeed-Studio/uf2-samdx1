@@ -2,7 +2,13 @@
 #define BOARD_CONFIG_H
 
 #define USB_VID 0x2886
-#define USB_PID 0x002F
+#if defined(NRF54L15)
+#define USB_PID 0x8066
+#elif defined(MG24)
+#define USB_PID 0x8062
+#else
+#error "Must define either PLAT_NRF54L15 or PLAT_MG24"
+#endif
 
 #define VENDOR_NAME "Seeed Studio"
 #define PRODUCT_NAME "XIAO SAMD11"
