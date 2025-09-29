@@ -1,3 +1,6 @@
 {
-    "files.associations": {}
+    "files.associations": {
+        "samd11.h": "c",
+        "sam.h": "c"
+    }
 }

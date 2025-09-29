@@ -46,15 +46,15 @@
 // Check various conditions; best leave on
 #define USE_ASSERT 0 // 188 bytes
 // Enable reading flash via FAT files; otherwise drive will appear empty
-#define USE_FAT 1 // 272 bytes
+#define USE_FAT 0 // 272 bytes
 // Enable index.htm file on the drive
-#define USE_INDEX_HTM 1 // 132 bytes
+#define USE_INDEX_HTM 0 // 132 bytes
 // Enable USB CDC (Communication Device Class; i.e., USB serial) monitor for Arduino style flashing
-#define USE_CDC 1 // 1264 bytes (plus terminal, see below)
+#define USE_CDC 0 // 1264 bytes (plus terminal, see below)
 // Support the UART (real serial port, not USB)
 #define USE_UART 0
 // Support Human Interface Device (HID) - serial, flashing and debug
-#define USE_HID 1 // 788 bytes
+#define USE_HID 0 // 788 bytes
 // Expose HID via WebUSB
 #define USE_WEBUSB 1
 // Doesn't yet disable code, just enumeration
@@ -70,7 +70,7 @@
 // will start the app. This only happens if the app says it wants that (see SINGLE_RESET() below).
 // If disabled here or by the app, the bootloader will only start with double-click of the reset
 // button.
-#define USE_SINGLE_RESET 1
+#define USE_SINGLE_RESET 0
 
 // Fine-tuning of features
 #define USE_HID_SERIAL 0   // just an example, not really needed; 36 bytes
@@ -246,12 +246,21 @@ void padded_memcpy(char *dst, const char *src, int len);
 #ifdef SAMD51
 #define DBL_TAP_PTR ((volatile uint32_t *)(HSRAM_ADDR + HSRAM_SIZE - 4))
 #endif
+#ifdef SAMD11
+// Use a dedicated NOLOAD section variable instead of last RAM word (which collides with initial stack pushes)
+extern volatile uint32_t dbl_tap_storage __attribute__((section(".uf2_dbl_tap")));
+#define DBL_TAP_PTR (&dbl_tap_storage)
+#endif
 #define DBL_TAP_MAGIC 0xf01669ef // Randomly selected, adjusted to have first and last bit set
 #define DBL_TAP_MAGIC_QUICK_BOOT 0xf02669ef
 
 #if USE_SINGLE_RESET
 #ifdef SAMD21
 #define SINGLE_RESET() (*((uint32_t *)0x20B4) == 0x87eeb07c)
+#endif
+#ifdef SAMD11
+// No known stable SINGLE_RESET signature region for SAMD11; disable.
+#undef USE_SINGLE_RESET
 #endif
 #ifdef SAMD51
 #define SINGLE_RESET() (*((uint32_t *)0x4268) == 0x87eeb07c)

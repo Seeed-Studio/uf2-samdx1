@@ -8,6 +8,9 @@ endif
 ifeq ($(CHIP_FAMILY), samd51)
 COMMON_FLAGS = -mthumb -mcpu=cortex-m4 -O2 -g -DSAMD51
 endif
+ifeq ($(CHIP_FAMILY), samd11)
+COMMON_FLAGS = -mthumb -mcpu=cortex-m0plus -Os -g -DSAMD11
+endif
 WFLAGS = \
 -Werror -Wall -Wstrict-prototypes \
 -Werror-implicit-function-declaration -Wpointer-arith -std=gnu99 \
@@ -40,6 +43,12 @@ BOOTLOADER_SIZE=16384
 SELF_LINKER_SCRIPT=scripts/samd51j19a_self.ld
 endif
 
+ifeq ($(CHIP_FAMILY), samd11)
+LINKER_SCRIPT=scripts/samd11d14a.ld
+BOOTLOADER_SIZE=8192
+SELF_LINKER_SCRIPT=scripts/samd11d14a_self.ld
+endif
+
 LDFLAGS= $(COMMON_FLAGS) \
 -Wall -Wl,--cref -Wl,--check-sections -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common \
 -Wl,--warn-section-align \
@@ -53,6 +62,10 @@ INCLUDES += -I$(BUILD_PATH)
 
 ifeq ($(CHIP_FAMILY), samd21)
 INCLUDES += -Ilib/samd21/samd21a/include/
+endif
+
+ifeq ($(CHIP_FAMILY), samd11)
+INCLUDES += -Ilib/samd11/include/
 endif
 
 ifeq ($(CHIP_FAMILY), samd51)
@@ -94,7 +107,11 @@ SELF_EXECUTABLE_INO=$(BUILD_PATH)/update-$(NAME).ino
 
 SUBMODULES = lib/uf2/README.md
 
+ifeq ($(CHIP_FAMILY), samd11)
+all: $(SUBMODULES) dirs $(EXECUTABLE)
+else
 all: $(SUBMODULES) dirs $(EXECUTABLE) $(SELF_EXECUTABLE)
+endif
 
 r: run
 b: burn
