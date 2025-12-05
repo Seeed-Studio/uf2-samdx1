@@ -4,10 +4,12 @@
 #define USB_VID 0x2886
 #if defined(NRF54L15)
 #define USB_PID 0x8066
+#elif defined(NRF54LM20A)
+#define USB_PID 0x8068
 #elif defined(MG24)
 #define USB_PID 0x8062
 #else
-#error "Must define either PLAT_NRF54L15 or PLAT_MG24"
+#error "Unsupported board variant"
 #endif
 
 #define VENDOR_NAME "Seeed Studio"
